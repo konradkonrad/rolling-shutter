@@ -3,12 +3,11 @@
 GO		?= go
 GOFLAGS		?=
 TINYGO		?= tinygo
-WASMOPT     ?= wasm-opt
+WASMOPT		?= wasm-opt
 BINDIR		?= ./bin
-EXECUTABLE	?= ${BINDIR}/rolling-shutter
 
 build:
-	${GO} build ${GOFLAGS} -o ${EXECUTABLE}
+	${GO} build ${GOFLAGS} -o ${BINDIR} ./ ./gnosh
 
 shcryptowasm: wasm
 	echo "The 'shcryptowasm' target is deprecated, use 'wasm' instead."
@@ -44,7 +43,7 @@ coverage:
 	${GO} tool cover -html=coverage.out
 
 clean:
-	rm -f ${EXECUTABLE}
+	rm -rf ${BINDIR}/gnosh ${BINDIR}/rolling-shutter
 
 install-tools: install-abigen install-sqlc install-protoc-gen-go  install-oapi-codegen install-golangci-lint install-cobra install-gofumpt install-stringer install-gci install-gotestsum
 
