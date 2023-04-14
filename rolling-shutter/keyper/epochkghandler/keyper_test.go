@@ -12,6 +12,7 @@ import (
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/db/chainobsdb"
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/medley/epochid"
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/medley/testdb"
+	"github.com/shutter-network/rolling-shutter/rolling-shutter/p2p"
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/p2pmsg"
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/shdb"
 )
@@ -31,7 +32,7 @@ func TestDecryptionKeyshareValidatorIntegration(t *testing.T) {
 	wrongEpochID, _ := epochid.BigToEpochID(common.Big1)
 	tkg := initializeEon(ctx, t, db, keyperIndex)
 	keyshare := tkg.EpochSecretKeyShare(epochID, keyperIndex).Marshal()
-	kpr := New(config, dbpool)
+	var kpr p2p.MessageHandler = &DecryptionKeyShareHandler{config: config, dbpool: dbpool}
 
 	tests := []struct {
 		name  string
@@ -85,7 +86,7 @@ func TestDecryptionKeyshareValidatorIntegration(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			validationResult, err := kpr.validateDecryptionKeyShare(ctx, tc.msg)
+			validationResult, err := kpr.ValidateMessage(ctx, tc.msg)
 			if tc.valid {
 				assert.NilError(t, err)
 			}
@@ -111,8 +112,7 @@ func TestDecryptionKeyValidatorIntegration(t *testing.T) {
 	tkg := initializeEon(ctx, t, db, keyperIndex)
 	secretKey := tkg.EpochSecretKey(epochID).Marshal()
 
-	kpr := New(config, dbpool)
-
+	var handler p2p.MessageHandler = &DecryptionKeyHandler{config: config, dbpool: dbpool}
 	tests := []struct {
 		name  string
 		valid bool
@@ -151,7 +151,7 @@ func TestDecryptionKeyValidatorIntegration(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			validationResult, err := kpr.validateDecryptionKey(ctx, tc.msg)
+			validationResult, err := handler.ValidateMessage(ctx, tc.msg)
 			if tc.valid {
 				assert.NilError(t, err)
 			}
@@ -170,8 +170,7 @@ func TestTriggerValidatorIntegration(t *testing.T) {
 	_, dbpool, closedb := testdb.NewKeyperTestDB(ctx, t)
 	defer closedb()
 
-	kpr := New(config, dbpool)
-
+	var kpr p2p.MessageHandler = &DecryptionTriggerHandler{config: config, dbpool: dbpool}
 	collatorKey1, err := ethcrypto.GenerateKey()
 	assert.NilError(t, err)
 	collatorAddress1 := ethcrypto.PubkeyToAddress(collatorKey1.PublicKey)
@@ -258,7 +257,7 @@ func TestTriggerValidatorIntegration(t *testing.T) {
 				tc.privKey,
 			)
 			assert.NilError(t, err)
-			validationResult, err := kpr.validateDecryptionTrigger(ctx, msg)
+			validationResult, err := kpr.ValidateMessage(ctx, msg)
 			if tc.valid {
 				assert.NilError(t, err)
 			}
