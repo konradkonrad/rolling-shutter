@@ -11,7 +11,13 @@ import (
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/p2pmsg"
 )
 
-func MustValidateMessageResult(t *testing.T, expectedResult bool, handler p2p.MessageHandler, ctx context.Context, msg p2pmsg.Message) { //nolint:revive
+func MustValidateMessageResult(
+	t *testing.T,
+	expectedResult bool,
+	handler p2p.MessageHandler,
+	ctx context.Context, //nolint:revive
+	msg p2pmsg.Message,
+) {
 	t.Helper()
 	ok, err := handler.ValidateMessage(ctx, msg)
 	if expectedResult {
@@ -22,7 +28,12 @@ func MustValidateMessageResult(t *testing.T, expectedResult bool, handler p2p.Me
 	)
 }
 
-func MustHandleMessage(t *testing.T, handler p2p.MessageHandler, ctx context.Context, msg p2pmsg.Message) []p2pmsg.Message { //nolint:revive
+func MustHandleMessage(
+	t *testing.T,
+	handler p2p.MessageHandler,
+	ctx context.Context, //nolint:revive
+	msg p2pmsg.Message,
+) []p2pmsg.Message {
 	t.Helper()
 	MustValidateMessageResult(t, true, handler, ctx, msg)
 	msgs, err := handler.HandleMessage(ctx, msg)
