@@ -14,7 +14,6 @@ import (
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/medley/service"
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/p2p"
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/p2pmsg"
-	shmsg "github.com/shutter-network/rolling-shutter/rolling-shutter/p2pmsg"
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/shdb"
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/snapshot/hubapi"
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/snapshot/snpjrpc"
@@ -157,7 +156,7 @@ func (snp *Snapshot) handleDecryptionKeyRequest(ctx context.Context, epochID []b
 	return nil
 }
 
-func (snp *Snapshot) SendMessage(ctx context.Context, msg shmsg.Message) error {
+func (snp *Snapshot) SendMessage(ctx context.Context, msg p2pmsg.Message) error {
 	log.Printf("sending %s", msg.LogInfo())
 
 	return snp.p2p.SendMessage(ctx, msg)
