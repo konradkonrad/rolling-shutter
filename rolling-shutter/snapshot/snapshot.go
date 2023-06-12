@@ -10,8 +10,10 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/db/snpdb"
+	"github.com/shutter-network/rolling-shutter/rolling-shutter/medley/epochid"
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/medley/service"
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/p2p"
+	"github.com/shutter-network/rolling-shutter/rolling-shutter/p2pmsg"
 	shmsg "github.com/shutter-network/rolling-shutter/rolling-shutter/p2pmsg"
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/shdb"
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/snapshot/hubapi"
@@ -22,6 +24,7 @@ import (
 var (
 	seenEons      = make(map[uint64]struct{})
 	seenProposals = make(map[string]struct{})
+	zeroTXHash    = make([]byte, 21)
 )
 
 type Snapshot struct {
@@ -127,14 +130,28 @@ func (snp *Snapshot) handleRequestEonKey(ctx context.Context) error {
 }
 
 func (snp *Snapshot) handleDecryptionKeyRequest(ctx context.Context, epochID []byte) error {
-	msg := &shmsg.TimedEpoch{
-		InstanceID: 0,
-		EpochID:    epochID,
-		NotBefore:  0,
-	}
-	err := snp.SendMessage(ctx, msg)
+	blockNumber, err := snp.l1Client.BlockNumber(ctx)
 	if err != nil {
 		return err
+	}
+	convEpoch, err := epochid.BytesToEpochID(epochID)
+	if err != nil {
+		return err
+	}
+	trigMsg, err := p2pmsg.NewSignedDecryptionTrigger(
+		snp.Config.InstanceID,
+		convEpoch,
+		blockNumber,
+		zeroTXHash,
+		snp.Config.EthereumKey,
+	)
+	if err != nil {
+		return err
+	}
+
+	send_err := snp.SendMessage(ctx, trigMsg)
+	if send_err != nil {
+		return send_err
 	}
 	log.Printf("Trigger decryption for proposal %X", epochID)
 	return nil
