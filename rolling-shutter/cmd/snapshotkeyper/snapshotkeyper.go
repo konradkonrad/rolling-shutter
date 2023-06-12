@@ -1,4 +1,4 @@
-package snapshot_keyper
+package snapshotkeyper
 
 import (
 	"bytes"
@@ -19,7 +19,7 @@ import (
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/medley/service"
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/p2p"
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/shdb"
-	"github.com/shutter-network/rolling-shutter/rolling-shutter/snapshot_keyper"
+	"github.com/shutter-network/rolling-shutter/rolling-shutter/snapshotkeyper"
 )
 
 var (
@@ -55,8 +55,8 @@ func generateConfigCmd() *cobra.Command {
 
 func Cmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "snapshot_keyper",
-		Short: "Run a Shutter snapshot_keyper node",
+		Use:   "snapshotkeyper",
+		Short: "Run a Shutter snapshotkeyper node",
 		Long: `This command runs a keyper node. It will connect to both an Ethereum and a
 Shuttermint node which have to be started separately in advance.`,
 		Args: cobra.NoArgs,
@@ -70,7 +70,7 @@ Shuttermint node which have to be started separately in advance.`,
 	return cmd
 }
 
-func readKeyperConfig() (snapshot_keyper.Config, error) {
+func readKeyperConfig() (snapshotkeyper.Config, error) {
 	viper.SetEnvPrefix("KEYPER")
 	viper.BindEnv("ShuttermintURL")
 	viper.BindEnv("EthereumURL")
@@ -95,7 +95,7 @@ func readKeyperConfig() (snapshot_keyper.Config, error) {
 		}
 	}()
 	var err error
-	config := snapshot_keyper.Config{}
+	config := snapshotkeyper.Config{}
 
 	viper.AddConfigPath("$HOME/.config/shutter")
 	viper.SetConfigName("keyper")
@@ -131,9 +131,9 @@ func keyperMain() error {
 		Str("version", shversion.Version()).
 		Str("address", config.GetAddress().Hex()).
 		Str("shuttermint", config.ShuttermintURL).
-		Msg("starting snapshot_keyper")
+		Msg("starting snapshotkeyper")
 
-	return service.RunWithSighandler(context.Background(), snapshot_keyper.New(config))
+	return service.RunWithSighandler(context.Background(), snapshotkeyper.New(config))
 }
 
 func initDB() error {
@@ -167,8 +167,8 @@ func initDB() error {
 	return nil
 }
 
-func exampleConfig() (*snapshot_keyper.Config, error) {
-	cfg := &snapshot_keyper.Config{
+func exampleConfig() (*snapshotkeyper.Config, error) {
+	cfg := &snapshotkeyper.Config{
 		ShuttermintURL:     "http://localhost:26657",
 		EthereumURL:        "http://127.0.0.1:8545/",
 		ContractsURL:       "http://127.0.0.1:8555/",

@@ -13,7 +13,7 @@ import (
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/cmd/p2pnode"
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/cmd/proxy"
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/cmd/snapshot"
-	"github.com/shutter-network/rolling-shutter/rolling-shutter/cmd/snapshot_keyper"
+	"github.com/shutter-network/rolling-shutter/rolling-shutter/cmd/snapshotkeyper"
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/medley/rootcmd"
 )
 
@@ -23,7 +23,7 @@ func subcommands() []*cobra.Command {
 		chain.Cmd(),
 		collator.Cmd(),
 		keyper.Cmd(),
-		snapshot_keyper.Cmd(),
+		snapshotkeyper.Cmd(),
 		mocknode.Cmd(),
 		snapshot.Cmd(),
 		cryptocmd.Cmd(),

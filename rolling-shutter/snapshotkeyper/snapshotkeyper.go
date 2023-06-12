@@ -1,5 +1,5 @@
-// Package snapshot_keyper contains the snapshot specific keyper implementation
-package snapshot_keyper
+// Package snapshotkeyper contains the snapshot specific keyper implementation
+package snapshotkeyper
 
 import (
 	"context"
@@ -31,7 +31,7 @@ import (
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/shmsg"
 )
 
-type snapshot_keyper struct {
+type snapshotkeyper struct {
 	config            *Config
 	dbpool            *pgxpool.Pool
 	shuttermintClient client.Client
@@ -44,7 +44,7 @@ type snapshot_keyper struct {
 }
 
 func New(config Config) service.Service {
-	return &snapshot_keyper{config: &config}
+	return &snapshotkeyper{config: &config}
 }
 
 // linkConfigToDB ensures that we use a database compatible with the given config. On first use
@@ -72,7 +72,7 @@ func linkConfigToDB(ctx context.Context, config *Config, dbpool *pgxpool.Pool) e
 	return nil
 }
 
-func (kpr *snapshot_keyper) Start(ctx context.Context, runner service.Runner) error {
+func (kpr *snapshotkeyper) Start(ctx context.Context, runner service.Runner) error {
 	config := kpr.config
 	dbpool, err := pgxpool.Connect(ctx, config.DatabaseURL)
 	if err != nil {
@@ -127,7 +127,7 @@ func (kpr *snapshot_keyper) Start(ctx context.Context, runner service.Runner) er
 	return runner.StartService(kpr.getServices()...)
 }
 
-func (snkpr *snapshot_keyper) setupP2PHandler() {
+func (snkpr *snapshotkeyper) setupP2PHandler() {
 	snkpr.p2p.AddMessageHandler(
 		epochkghandler.NewDecryptionKeyHandler(snkpr.config, snkpr.dbpool),
 		epochkghandler.NewDecryptionKeyShareHandler(snkpr.config, snkpr.dbpool),
@@ -136,7 +136,7 @@ func (snkpr *snapshot_keyper) setupP2PHandler() {
 	)
 }
 
-func (snkpr *snapshot_keyper) getServices() []service.Service {
+func (snkpr *snapshotkeyper) getServices() []service.Service {
 	services := []service.Service{
 		snkpr.p2p,
 		service.ServiceFn{Fn: snkpr.operateShuttermint},
@@ -150,7 +150,7 @@ func (snkpr *snapshot_keyper) getServices() []service.Service {
 	return services
 }
 
-func (kpr *snapshot_keyper) handleContractEvents(ctx context.Context) error {
+func (kpr *snapshotkeyper) handleContractEvents(ctx context.Context) error {
 	events := []*eventsyncer.EventType{
 		kpr.contracts.KeypersConfigsListNewConfig,
 		kpr.contracts.CollatorConfigsListNewConfig,
@@ -158,7 +158,7 @@ func (kpr *snapshot_keyper) handleContractEvents(ctx context.Context) error {
 	return chainobserver.New(kpr.contracts, kpr.dbpool).Observe(ctx, events)
 }
 
-func (snkpr *snapshot_keyper) handleOnChainChanges(ctx context.Context, tx pgx.Tx, l1BlockNumber uint64) error {
+func (snkpr *snapshotkeyper) handleOnChainChanges(ctx context.Context, tx pgx.Tx, l1BlockNumber uint64) error {
 	err := snkpr.handleOnChainKeyperSetChanges(ctx, tx)
 	if err != nil {
 		return err
@@ -174,7 +174,7 @@ func (snkpr *snapshot_keyper) handleOnChainChanges(ctx context.Context, tx pgx.T
 // NewBlockSeen messages to the shuttermint chain, so that the chain can start new batch configs if
 // enough keypers have seen a block past the start block of some BatchConfig. We only send messages
 // when the current block we see, could lead to a batch config being started.
-func (snkpr *snapshot_keyper) sendNewBlockSeen(ctx context.Context, tx pgx.Tx, l1BlockNumber uint64) error {
+func (snkpr *snapshotkeyper) sendNewBlockSeen(ctx context.Context, tx pgx.Tx, l1BlockNumber uint64) error {
 	q := kprdb.New(tx)
 	lastBlock, err := q.GetLastBlockSeen(ctx)
 	if err != nil {
@@ -207,7 +207,7 @@ func (snkpr *snapshot_keyper) sendNewBlockSeen(ctx context.Context, tx pgx.Tx, l
 }
 
 // handleOnChainKeyperSetChanges looks for changes in the keyper_set table.
-func (snkpr *snapshot_keyper) handleOnChainKeyperSetChanges(ctx context.Context, tx pgx.Tx) error {
+func (snkpr *snapshotkeyper) handleOnChainKeyperSetChanges(ctx context.Context, tx pgx.Tx) error {
 	q := kprdb.New(tx)
 	latestBatchConfig, err := q.GetLatestBatchConfig(ctx)
 	if err == pgx.ErrNoRows {
@@ -268,7 +268,7 @@ func (snkpr *snapshot_keyper) handleOnChainKeyperSetChanges(ctx context.Context,
 	return nil
 }
 
-func (snkpr *snapshot_keyper) operateShuttermint(ctx context.Context) error {
+func (snkpr *snapshotkeyper) operateShuttermint(ctx context.Context) error {
 	for {
 		l1BlockNumber, err := retry.FunctionCall(ctx, snkpr.l1Client.BlockNumber)
 		if err != nil {
@@ -298,7 +298,7 @@ func (snkpr *snapshot_keyper) operateShuttermint(ctx context.Context) error {
 	}
 }
 
-func (snkpr *snapshot_keyper) broadcastEonPublicKeys(ctx context.Context) error {
+func (snkpr *snapshotkeyper) broadcastEonPublicKeys(ctx context.Context) error {
 	for {
 		eonPublicKeys, err := kprdb.New(snkpr.dbpool).GetAndDeleteEonPublicKeys(ctx)
 		if err != nil {

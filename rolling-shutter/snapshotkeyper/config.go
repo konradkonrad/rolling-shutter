@@ -1,4 +1,4 @@
-package snapshot_keyper
+package snapshotkeyper
 
 import (
 	"crypto/ecdsa"
