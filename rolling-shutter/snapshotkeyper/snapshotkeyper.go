@@ -85,10 +85,6 @@ func (snkpr *snapshotkeyper) Start(ctx context.Context, runner service.Runner) e
 	if err != nil {
 		return err
 	}
-	/*l2Client, err := ethclient.Dial(config.ContractsURL)
-	if err != nil {
-		return err
-	}*/
 	contracts, err := deployment.NewContracts(l1Client, config.DeploymentDir)
 	if err != nil {
 		return err
