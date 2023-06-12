@@ -131,7 +131,6 @@ services:
         condition: service_healthy
     logging: *logging
 
-
   keyper-0:
     image: snapshutter
     restart: always
