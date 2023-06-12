@@ -137,7 +137,7 @@ services:
     restart: always
     entrypoint:
       - /rolling-shutter
-      - snapshot_keyper
+      - snapshotkeyper
     command: "--config /config/keyper-0.toml"
     volumes:
       - ./config:/config
@@ -156,7 +156,7 @@ services:
     restart: always
     entrypoint:
       - /rolling-shutter
-      - snapshot_keyper
+      - snapshotkeyper
     command: "--config /config/keyper-1.toml"
     volumes:
       - ./config:/config
@@ -175,7 +175,7 @@ services:
     restart: always
     entrypoint:
       - /rolling-shutter
-      - snapshot_keyper
+      - snapshotkeyper
     command: "--config /config/keyper-2.toml"
     volumes:
       - ./config:/config
