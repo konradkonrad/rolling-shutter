@@ -72,8 +72,8 @@ func linkConfigToDB(ctx context.Context, config *Config, dbpool *pgxpool.Pool) e
 	return nil
 }
 
-func (kpr *snapshotkeyper) Start(ctx context.Context, runner service.Runner) error {
-	config := kpr.config
+func (snkpr *snapshotkeyper) Start(ctx context.Context, runner service.Runner) error {
+	config := snkpr.config
 	dbpool, err := pgxpool.Connect(ctx, config.DatabaseURL)
 	if err != nil {
 		return errors.Wrap(err, "failed to connect to database")
@@ -115,16 +115,16 @@ func (kpr *snapshotkeyper) Start(ctx context.Context, runner service.Runner) err
 		Environment:    p2p.Production,
 	})
 
-	kpr.dbpool = dbpool
-	kpr.shuttermintClient = shuttermintClient
-	kpr.messageSender = messageSender
-	kpr.l1Client = l1Client
-	kpr.contracts = contracts
-	kpr.shuttermintState = smobserver.NewShuttermintState(config)
-	kpr.p2p = p2pHandler
+	snkpr.dbpool = dbpool
+	snkpr.shuttermintClient = shuttermintClient
+	snkpr.messageSender = messageSender
+	snkpr.l1Client = l1Client
+	snkpr.contracts = contracts
+	snkpr.shuttermintState = smobserver.NewShuttermintState(config)
+	snkpr.p2p = p2pHandler
 
-	kpr.setupP2PHandler()
-	return runner.StartService(kpr.getServices()...)
+	snkpr.setupP2PHandler()
+	return runner.StartService(snkpr.getServices()...)
 }
 
 func (snkpr *snapshotkeyper) setupP2PHandler() {
@@ -150,12 +150,12 @@ func (snkpr *snapshotkeyper) getServices() []service.Service {
 	return services
 }
 
-func (kpr *snapshotkeyper) handleContractEvents(ctx context.Context) error {
+func (snkpr *snapshotkeyper) handleContractEvents(ctx context.Context) error {
 	events := []*eventsyncer.EventType{
-		kpr.contracts.KeypersConfigsListNewConfig,
-		kpr.contracts.CollatorConfigsListNewConfig,
+		snkpr.contracts.KeypersConfigsListNewConfig,
+		snkpr.contracts.CollatorConfigsListNewConfig,
 	}
-	return chainobserver.New(kpr.contracts, kpr.dbpool).Observe(ctx, events)
+	return chainobserver.New(snkpr.contracts, snkpr.dbpool).Observe(ctx, events)
 }
 
 func (snkpr *snapshotkeyper) handleOnChainChanges(ctx context.Context, tx pgx.Tx, l1BlockNumber uint64) error {
