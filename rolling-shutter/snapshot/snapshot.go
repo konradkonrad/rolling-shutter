@@ -148,9 +148,9 @@ func (snp *Snapshot) handleDecryptionKeyRequest(ctx context.Context, epochID []b
 		return err
 	}
 
-	send_err := snp.SendMessage(ctx, trigMsg)
-	if send_err != nil {
-		return send_err
+	err = snp.SendMessage(ctx, trigMsg)
+	if err != nil {
+		return err
 	}
 	log.Printf("Trigger decryption for proposal %X", epochID)
 	return nil
