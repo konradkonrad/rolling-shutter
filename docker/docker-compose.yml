@@ -93,7 +93,7 @@ services:
       caddy: live.snapshot.shutter.network
       caddy.reverse_proxy: "{{upstreams 8754}}"
 
- bootnode-0:
+  bootnode-0:
     image: snapshutter
     restart: always
     entrypoint:
@@ -112,7 +112,7 @@ services:
         condition: service_healthy
     logging: *logging
 
- bootnode-1:
+  bootnode-1:
     image: snapshutter
     restart: always
     entrypoint:
