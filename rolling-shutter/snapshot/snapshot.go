@@ -3,6 +3,7 @@ package snapshot
 import (
 	"context"
 
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
@@ -26,11 +27,11 @@ var (
 type Snapshot struct {
 	Config Config
 
-	p2p    *p2p.P2PHandler
-	dbpool *pgxpool.Pool
-	db     *snpdb.Queries
-
-	hubapi *hubapi.HubAPI
+	p2p      *p2p.P2PHandler
+	dbpool   *pgxpool.Pool
+	db       *snpdb.Queries
+	l1Client *ethclient.Client
+	hubapi   *hubapi.HubAPI
 }
 
 func New(config Config) service.Service {
@@ -53,6 +54,11 @@ func (snp *Snapshot) Start(ctx context.Context, runner service.Runner) error {
 	log.Printf(
 		"starting Snapshot Hub interface",
 	)
+	l1Client, err := ethclient.Dial(snp.Config.EthereumURL)
+	if err != nil {
+		return err
+	}
+	snp.l1Client = l1Client
 
 	dbpool, err := pgxpool.Connect(ctx, snp.Config.DatabaseURL)
 	if err != nil {
