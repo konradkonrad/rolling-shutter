@@ -23,7 +23,7 @@ import (
 var (
 	seenEons      = make(map[uint64]struct{})
 	seenProposals = make(map[string]struct{})
-	zeroTXHash    = make([]byte, 21)
+	zeroTXHash    = make([]byte, 32)
 )
 
 type Snapshot struct {
