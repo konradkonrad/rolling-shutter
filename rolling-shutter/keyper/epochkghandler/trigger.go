@@ -31,6 +31,7 @@ func (*DecryptionTriggerHandler) MessagePrototypes() []p2pmsg.Message {
 }
 
 func (handler *DecryptionTriggerHandler) ValidateMessage(ctx context.Context, msg p2pmsg.Message) (bool, error) {
+	log.Warn().Msg("validation")
 	trigger := msg.(*p2pmsg.DecryptionTrigger)
 	if trigger.GetInstanceID() != handler.config.GetInstanceID() {
 		return false, errors.Errorf("instance ID mismatch (want=%d, have=%d)", handler.config.GetInstanceID(), trigger.GetInstanceID())
@@ -60,6 +61,7 @@ func (handler *DecryptionTriggerHandler) ValidateMessage(ctx context.Context, ms
 	if err != nil {
 		return false, errors.Wrapf(err, "error while verifying decryption trigger signature for epoch: %d", trigger.EpochID)
 	}
+	log.Warn().Bool("signature", signatureValid).Msg("validation")
 	return signatureValid, nil
 }
 

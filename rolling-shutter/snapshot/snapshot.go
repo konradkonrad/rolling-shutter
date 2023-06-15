@@ -79,6 +79,7 @@ func (snp *Snapshot) Start(ctx context.Context, runner service.Runner) error {
 	snp.db = db
 
 	if snp.Config.MetricsEnabled {
+		log.Printf("Metrics Enabled")
 		err = snp.initMetrics(ctx)
 		if err != nil {
 			return err

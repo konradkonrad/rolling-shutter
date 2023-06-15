@@ -116,6 +116,7 @@ func (handler *EonPublicKeyHandler) HandleMessage(ctx context.Context, m p2pmsg.
 	eonID := eonPubKeyMsg.GetEon()
 	key := eonPubKeyMsg.GetPublicKey()
 	db := snpdb.New(handler.dbpool)
+	log.Printf("eonID %s", eonID)
 	err := db.InsertEonPublicKey(
 		ctx, snpdb.InsertEonPublicKeyParams{
 			EonID:        int64(eonID),

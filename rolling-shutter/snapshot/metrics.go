@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/rs/zerolog/log"
 
 	"github.com/shutter-network/rolling-shutter/rolling-shutter/medley/service"
 )
@@ -56,10 +56,12 @@ type MetricsServer struct {
 }
 
 func NewMetricsServer(config Config) service.Service {
+	log.Printf("Creating MetricsServer")
 	return &MetricsServer{config: &config, mux: http.NewServeMux()}
 }
 
 func (srv *MetricsServer) Start(_ context.Context, _ service.Runner) error {
+	log.Printf("MetricsServer Start called")
 	srv.mux.Handle("/metrics", promhttp.Handler())
 	addr := fmt.Sprintf("%s:%d", srv.config.MetricsHost, srv.config.MetricsPort)
 	server := &http.Server{
@@ -69,6 +71,6 @@ func (srv *MetricsServer) Start(_ context.Context, _ service.Runner) error {
 		Handler:      srv.mux,
 	}
 
-	log.Info("Running metrics server at %s", addr)
+	log.Info().Str("metricsserver", addr).Msg("Running metrics server at")
 	return server.ListenAndServe()
 }
