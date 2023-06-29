@@ -722,6 +722,8 @@ func (app *ShutterApp) EndBlock(req abcitypes.RequestEndBlock) abcitypes.Respons
 	if len(validatorUpdates) > 0 {
 		log.Info().Int("count", len(validatorUpdates)).Interface("validator-updates", validatorUpdates).
 			Msg("applying validator updates")
+	} else {
+		log.Info().Msg("There are no validator updates")
 	}
 	return abcitypes.ResponseEndBlock{
 		ValidatorUpdates: validatorUpdates,
