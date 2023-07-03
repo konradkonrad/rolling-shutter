@@ -108,6 +108,13 @@
   (fn [sys {:keyper/keys [description]}]
     description))
 
+(def check-tm-status
+  (->>
+    (play/get-jsonrpc "http://localhost:28000/status")
+    play/get-jsonrpc-result
+  )
+)
+
 (defmethod runner/run ::add-spare-keyper-set
   [sys m]
   (runner/dispatch sys {:run :process/run
@@ -358,6 +365,8 @@
                                    :keyper/num keyper
                                    :keyper/expected-count 2})}
 
+
+
                   {:check :loop/until
                    :loop/description "eon should exist for all keypers"
                    :loop/timeout-ms (* 60 1000)
@@ -404,6 +413,14 @@
                                   {:check :keyper/dkg-success
                                    :keyper/eon 2
                                    :keyper/num keyper})}
+                  {:check :loop/until
+                   :loop/description "All chains should see 4 validators"
+                   :loop/timeout-ms (* 20 1000)
+                   :loop/checks (for [keyper (range num-keypers)]
+                                  {:check :keyper/check-tm-status
+                                   :keyper/num keyper
+                                   :keyper/expected-count 2})}
+
                   (for [keyper (range num-keypers)]
                     {:check :keyper/tendermint-batch-config-started
                      :keyper-num keyper})
