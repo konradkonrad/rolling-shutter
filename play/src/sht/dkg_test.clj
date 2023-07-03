@@ -108,12 +108,7 @@
   (fn [sys {:keyper/keys [description]}]
     description))
 
-(def check-tm-status
-  (->>
-    (play/get-jsonrpc "http://localhost:28000/status")
-    play/get-jsonrpc-result
-  )
-)
+
 
 (defmethod runner/run ::add-spare-keyper-set
   [sys m]
@@ -122,6 +117,11 @@
                         :process/wait true
                         :process/cmd ["npx" "hardhat" "run" "--network" "localhost" "scripts/add-spare-keyper-set.js"]
                         :process/opts {:dir (str (fs/path play/repo-root "contracts"))}}))
+
+(defmethod runner/run ::check-tm-status
+  [url resultcount]
+  (play/check-tm-status url resultcount)
+)
 
 (defmethod runner/run ::configure-keypers
   [sys m]
@@ -413,14 +413,12 @@
                                   {:check :keyper/dkg-success
                                    :keyper/eon 2
                                    :keyper/num keyper})}
-                  {:check :loop/until
-                   :loop/description "All chains should see 4 validators"
-                   :loop/timeout-ms (* 20 1000)
-                   :loop/checks (for [keyper (range num-keypers)]
-                                  {:check :keyper/check-tm-status
-                                   :keyper/num keyper
-                                   :keyper/expected-count 2})}
-
+                  {:check {
+                    :chk/ok? (:run (::check-tm-status "http://localhost:28000/validators" 4))
+                    :chk/description "/validators should contain 4 entries"
+                    :chk/info "dunno"
+                  }
+                  }
                   (for [keyper (range num-keypers)]
                     {:check :keyper/tendermint-batch-config-started
                      :keyper-num keyper})

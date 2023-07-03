@@ -315,3 +315,15 @@
                 (jsonrpc-body "admin_addCollator"
                               ["0x96858D19fB1398a23fd3c5E9fb205B964d5BA46b" 55]))
   (add-collator "http://localhost:8555" "0x96858D19fB1398a23fd3c5E9fb205B964d5BA46b" 55))
+
+
+(defn check-tm-status
+  [url resultcount]
+  (= resultcount
+    (edn/read-string
+      (:total get-jsonrpc-result
+        (get-jsonrpc url)
+      )
+    )
+  )
+)
