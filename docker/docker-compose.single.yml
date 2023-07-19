@@ -1,0 +1,128 @@
+x-logging: &logging
+  driver: local
+  options:
+    max-file: 10
+
+services:
+  rs-build:
+    build:
+      dockerfile: docker/build-src/snapshot/Dockerfile
+      context: ..
+    image: snapshutter
+    command: "-v"
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -U postgres
+    logging: *logging
+
+  deploy-contracts:
+    build:
+      dockerfile: docker/build-src/deploy_contracts/Dockerfile
+      context: ..
+    volumes:
+      - ./data/deployments:/contracts/deployments
+      - ./config:/config
+    environment:
+      DEPLOY_CONF: /config/node-deploy.json
+    logging: *logging
+
+  chain-validator:
+    image: snapshutter
+    restart: always
+    entrypoint:
+      - /rolling-shutter
+      - chain
+    volumes:
+      - ./data/chain-validator:/chain
+      - ./data/deployments:/deployments
+    command: "--config /chain/config/config.toml"
+    depends_on:
+      chain-sentry:
+        condition: service_started
+    logging: *logging
+
+  chain-sentry:
+    image: snapshutter
+    restart: always
+    entrypoint:
+      - /rolling-shutter
+      - chain
+    volumes:
+      - ./data/chain-sentry:/chain
+      - ./data/deployments:/deployments
+    ports:
+      - "26657:26657"
+    command: "--config /chain/config/config.toml"
+    logging: *logging
+
+  snapshot:
+    image: snapshutter
+    restart: always
+    entrypoint:
+      - /rolling-shutter
+      - snapshot
+    command: "--config /config/snapshot.toml"
+    volumes:
+      - ./config:/config
+    ports:
+      - "8754:8754"
+      - "9100:9100"
+    depends_on:
+      db:
+        condition: service_healthy
+      devkeyper-01:
+        condition: service_started
+    logging: *logging
+    labels:
+      caddy: live.snapshot.shutter.network
+      caddy.reverse_proxy: "{{upstreams 8754}}"
+
+  devkeyper-01:
+    image: snapshutter
+    restart: always
+    entrypoint:
+      - /rolling-shutter
+      - snapshotkeyper
+    command: "--config /config/devkeyper-01.toml"
+    volumes:
+      - ./config:/config
+      - ./data/deployments:/deployments
+    ports:
+      - "27000:27000"
+    depends_on:
+      db:
+        condition: service_healthy
+      chain-sentry:
+        condition: service_started
+    logging: *logging
+
+  caddy:
+    image: lucaslorentz/caddy-docker-proxy:ci-alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/caddy:/data
+    profiles:
+      - live
+    environment:
+      CADDY_INGRESS_NETWORKS: snapshutter_default
+    labels:
+      caddy.email: devops@brainbot.com
+
+  dummyserver:
+    build:
+      dockerfile: docker/build-src/dummyserver/Dockerfile
+      context: ..
+    restart: always
+    profiles:
+      - dev

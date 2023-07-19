@@ -7,6 +7,13 @@ else
   DC=docker-compose
 fi
 
+DC_ENV="${DC_ENV:-dev}"
+if [[ "${DC_ENV}" = "single" ]]; then
+	DC="${DC} -f docker-compose.single.yml"
+else
+	DC="${DC} -f docker-compose.yml"
+fi
+
 echo "Testing decryption key generation"
 EPOCH_ID="480184f2b2dedec2641fb1a0b8cb1f0a8af8e7edd90f2f5acfc0858c29ed964c"
 json_body="{\"jsonrpc\": \"2.0\", \"method\": \"get_decryption_key\", \"id\": 1, \"params\": [\"1\", \"${EPOCH_ID}\"]}"

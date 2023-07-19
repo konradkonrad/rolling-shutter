@@ -89,7 +89,7 @@ module.exports = {
       ],
     },
     dockerGeth: {
-      url: "http://geth:8545",
+      url: "http://10.135.179.106:8545",
       accounts: "remote",
     },
   },

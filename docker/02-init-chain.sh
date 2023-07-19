@@ -9,6 +9,14 @@ else
   DC=docker-compose
 fi
 
+DC_ENV="${DC_ENV:-dev}"
+if [[ "${DC_ENV}" = "single" ]]; then
+	DC="${DC} -f docker-compose.single.yml"
+	exit "Don't run this for distributed keypers"
+else
+	DC="${DC} -f docker-compose.yml"
+fi
+
 $DC stop geth
 $DC rm -f geth
 $DC stop chain-{0..2}-{validator,sentry} chain-seed

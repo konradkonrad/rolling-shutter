@@ -1,0 +1,31 @@
+# Shutter keyper config
+# Ethereum address: 0xA6a55912d0517BDCD2cD49Eb63Df2Ea8FA85Faf8
+# Peer identity: /p2p/12D3KooWShNYN3ZfSiTWGq5TYK9cFkf8SBUQ7aL9dgPiWKcCNc8m
+
+ShuttermintURL	    = "http://chain-sentry:26657"
+EthereumURL         = "http://10.135.179.106:8545/"
+DeploymentDir       = "./deployments/dockerGeth/"
+
+# DatabaseURL looks like postgres://username:password@localhost:5432/database_name
+# If it's empty, we use the standard PG* environment variables
+DatabaseURL		= "postgres://postgres@db:5432/devkeyper-02"
+DKGPhaseLength		= 8
+
+# p2p configuration
+ListenAddresses   = ["/ip4/0.0.0.0/tcp/23000"]
+CustomBootstrapAddresses  = [
+	"/dns4/boot1.snapshot.shutter.network/tcp/23000/p2p/12D3KooWGkX3z2kffawGBVQ9w8ByniHxff6whoTPMyhC61aYABfD",
+	"/dns4/boot2.snapshot.shutter.network/tcp/23000/p2p/12D3KooWNeRXuJ4iDz5BAaVCVQ8qLesgmXVn77fjpEXmVktuMy9H"
+]
+
+# Secret Keys
+EncryptionKey	= "cea283bae6753e58668be7984ba301d80e3c65bb4dd98a25b8719bafa83431c9"
+SigningKey	= "59a707ab3c1a5d85aad03302467fdb05715bbcd23be4a02375b91a0b30bf30f1"
+ValidatorPublicKey	= "32e9b4b95033bb914250f708281b377b6cbbb62f60fc17ab51ee9bbf693d28c9"
+P2PKey          = "CAESQFjNOcIGvYpaZMnnWsGkX0v7SG79qEoWNmEHTT8fTJ/s+swIlp/XCoSDnh5hlpbeGdDu04Tg5PIUIcH9Xj7ZmYY="
+
+# HTTP interface
+HTTPEnabled       = false
+HTTPListenAddress = ":3000"
+
+InstanceID = 0
